@@ -1,84 +1,66 @@
 <?php
     use \Psr\Http\Message\ServerRequestInterface as Request;
     use \Psr\Http\Message\ResponseInterface as Response;
+    use Aws\DynamoDb\DynamoDbClient;
 
-    require 'db.php';
+    date_default_timezone_set('America/New_York');
+
     require 'vendor/autoload.php';
+    require 'aws/aws-autoloader.php';
+
+    $client = new DynamoDbClient([
+        'region'  => 'us-east-1',
+        'version' => 'latest',
+        'credentials' => [
+            'key'    => 'AKIAIZ7563FPRHUAZSOQ',
+            'secret' => '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',
+        ]
+    ]);
 
     $app = new \Slim\App;
-
-    $app->post('/projects/{id}/events', postNewProjectEvent);
+    $app->post('/events', postNewEvent);
     $app->run();
 
 
     /*  ------------------
-         SAMPLE REQUEST
+         SAMPLE JSON REQUEST FOR postNewEvent
         ------------------
         {
-        	"instance_id": null,
-            "event_datetime": "0000-00-00 00:00:00"
-        	"event_type": "click",
-        	"event_x": 1200,
-        	"event_y": 500,
-        	"event_target": "body.fade-in.toolbar-tray-open.toolbar-fixed.toolbar-horizontal",
-        	"event_value": null,
-        	"event_path": "/",
-        	"event_session": 00000000000000,
-        	"screen_width": 1920,
-        	"screen_height": 1080
+        	"ProjectName": "ABC",
+            "EventTimestamp": "1234567890",
+        	"InstanceID": "1",
+        	"EventType": "ABC",
+        	"EventX": "253",
+            "EventY": "405",
+        	"EventTarget": "body.fade-in.toolbar-tray-open.toolbar-fixed.toolbar-horizontal",
+        	"EventValue": null,
+        	"EventURL": "http://localhost:8888",
+        	"EventPath": "/page/2",
+            "SessionID": "1240323523",
+        	"SessionScreenWidth": "1920",
+        	"SessionScreenHeight": "1080"
         }
         ------------------
     */
-    function postNewProjectEvent(Request $request, Response $response) {
-        $id = $request->getAttribute('id');
+    function postNewEvent(Request $request, Response $response) {
+        global $client;
         $req = json_decode($request->getBody());
         $vars = get_object_vars($req);
      
-        $sql = '
-            INSERT INTO 
-                event (
-                    `project_id`,
-                    `instance_id`,
-                    `event_type`,
-                    `event_x`,
-                    `event_y`,
-                    `event_target`,
-                    `event_value`,
-                    `event_path`,
-                    `event_session`
-                ) 
-            VALUES 
-                (
-                    :project_id, 
-                    :instance_id, 
-                    :event_type,
-                    :event_x,
-                    :event_y,
-                    :event_target,
-                    :event_value,
-                    :event_path,
-                    :event_session
-                )
-            ';
-        try {
-            $db = getDB();
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam('project_id', $id);
-            $stmt->bindParam('instance_id', $vars['instance_id']);
-            $stmt->bindParam('event_type', $vars['event_type']);
-            $stmt->bindParam('event_x', $vars['event_x']);
-            $stmt->bindParam('event_y', $vars['event_y']);
-            $stmt->bindParam('event_target', $vars['event_target']);
-            $stmt->bindParam('event_value', $vars['event_value']);
-            $stmt->bindParam('event_path', $vars['event_path']);
-            $stmt->bindParam('event_session', $vars['event_session']);
-            $stmt->execute();
-            
-            $result = $db->lastInsertId();
-            print_r($result);
-            $db = null;
-        } catch(PDOException $e) {
-            echo json_encode($e->getMessage()); 
+        $putarray = array();
+
+        foreach ($vars as $key => $value) {
+            if (!empty($value)){
+                $putarray[$key] = DynamoPutRequestItemGenerator($value);
+            }
         }
-    }    
+        
+        $response = $client->putItem(array(
+            'TableName' => 'AnalyticsEvents', 
+            'Item' => $putarray
+        ));
+    }
+    function DynamoPutRequestItemGenerator($value) {
+        return array('S' => strval($value));
+    }
 ?>
