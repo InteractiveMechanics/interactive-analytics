@@ -33,9 +33,8 @@
         	"EventX": "253",
             "EventY": "405",
         	"EventTarget": "body.fade-in.toolbar-tray-open.toolbar-fixed.toolbar-horizontal",
-        	"EventValue": null,
-        	"EventURL": "http://localhost:8888",
-        	"EventPath": "/page/2",
+        	"EventDataValue": null,
+            ...
             "SessionID": "1240323523",
         	"SessionScreenWidth": "1920",
         	"SessionScreenHeight": "1080"
