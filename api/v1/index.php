@@ -1,4 +1,8 @@
 <?php
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token');
+
     use \Psr\Http\Message\ServerRequestInterface as Request;
     use \Psr\Http\Message\ResponseInterface as Response;
     use Aws\DynamoDb\DynamoDbClient;
@@ -18,9 +22,23 @@
     ]);
 
     $app = new \Slim\App;
+    
+    //$app->get('/projects', getAllProjects);
+    //$app->get('/projects/:name', getProjectByName);
+    //$app->get('/projects/:name/:instance', getProjectInstanceByName);
+
     $app->post('/events', postNewEvent);
     $app->run();
 
+
+    
+    //function getAllProjects(Response $response) {
+    //    global $client;
+    //    $result = $client->scan(array(
+    //        'TableName' => 'AnalyticsEvents',
+    //        
+    //   ));
+    //}
 
     /*  ------------------
          SAMPLE JSON REQUEST FOR postNewEvent

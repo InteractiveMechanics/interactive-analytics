@@ -37,8 +37,8 @@ null==d?void 0:d))},attrHooks:{type:{set:function(a,b){if(!o.radioValue&&"radio"
             // TODO: Add more event listeners
 
             $jquery("body").on("click dblclick drag touchmove touchstart touchend", Analytics.clickEvent)
-            $jquery("video").on("play ended seeked pause", Analytics.mediaEvent);
-            $jquery("audio").on("play ended seeked pause", Analytics.mediaEvent);
+            $jquery("body").on("play ended seeked pause", "video", Analytics.mediaEvent);
+            $jquery("body").on("play ended seeked pause", "audio", Analytics.mediaEvent);
         }
 
         Analytics.clickEvent = function(event){
@@ -69,6 +69,18 @@ null==d?void 0:d))},attrHooks:{type:{set:function(a,b){if(!o.radioValue&&"radio"
                 $jquery.extend(data, dataAttributes);
             }
 
+            Analytics.checkSession();
+            Analytics.buildData(data);
+        }
+
+        Analytics.sendData = function(eventData){
+            var data = {
+                "EventTarget": "function"
+            };
+            if (eventData) {
+                $jquery.extend(data, eventData);
+            }
+        
             Analytics.checkSession();
             Analytics.buildData(data);
         }
@@ -123,7 +135,11 @@ null==d?void 0:d))},attrHooks:{type:{set:function(a,b){if(!o.radioValue&&"radio"
 
             for (var key in data) {
                 if (key.startsWith("analytics")){
-                    json["Data" + Analytics.uppercaseFirst(key)] = data[key];
+                    if (key !== "analytics-reset"){
+                        json["Data" + Analytics.uppercaseFirst(key)] = data[key];
+                    } else {
+                        Analytics.terminateSession();
+                    }
                 }
             }
             return json;

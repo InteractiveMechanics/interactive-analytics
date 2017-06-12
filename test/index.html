@@ -3,6 +3,12 @@
     <title>Analytics Test Page</title>
 </head>
 <body>
+    <script src="//analytics.interactivemechanics.com/analytics.js"></script>
+    <script>
+        Analytics.init("WhatArePrisonsFor-1");
+    </script>
+
+
     <main>
         <h1 id="page-title" class="headline-test">Analytics Test Page</h1>
         <video width="400" controls data-analytics-title="Big Buck Bunny">
@@ -12,11 +18,18 @@
         </video>
 
         <button data-analytics-title="Test Button" data-analytics-value="Pressed">Test button</button>
+        <button onclick="sendSomeData()">Send some data</button>
     </main>
     
-    <script src="//analytics.interactivemechanics.com/analytics.js"></script>
     <script>
-        Analytics.init("WhatArePrisonsFor-1");
+        function sendSomeData(){
+            Analytics.sendData(
+                { 
+                    "EventType": "Send some data", 
+                    "DataAnalyticsOrder": "Rehabilitation, Deterrence, Incapacitation, Retribution" 
+                }
+            );
+        }
     </script>
 </body>
 </html>
